@@ -1,0 +1,239 @@
+{
+  "info": {
+    "_postman_id": "8be61f29-c32f-47b6-b8b9-71a91529d633",
+    "name": "Tours and Travels Agency API",
+    "description": "JWT-authenticated CRUD requests for destinations, packages, customers, and bookings. Log in as a CUSTOMER for self-service booking requests or use Login administrator for admin-only operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "destinationId", "value": "1" },
+    { "key": "packageId", "value": "1" },
+    { "key": "customerId", "value": "1" },
+    { "key": "bookingId", "value": "1" },
+    { "key": "adminEmail", "value": "admin@example.com" },
+    { "key": "adminPassword", "value": "" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "Register customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Asha Patel\",\n  \"email\": \"asha@example.com\",\n  \"password\": \"a-strong-password\",\n  \"role\": \"CUSTOMER\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('token', pm.response.json().token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"asha@example.com\",\n  \"password\": \"a-strong-password\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  pm.collectionVariables.set('token', pm.response.json().token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login administrator",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  const response = pm.response.json();",
+                "  if (response.role === 'ADMIN') {",
+                "    pm.collectionVariables.set('token', response.token);",
+                "  } else {",
+                "    pm.test('The supplied account has the ADMIN role', () => pm.expect(response.role).to.eql('ADMIN'));",
+                "  }",
+                "}"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Destinations",
+      "item": [
+        {
+          "name": "Get all destinations",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/destinations" }
+        },
+        {
+          "name": "Get destination by ID",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/destinations/{{destinationId}}" }
+        },
+        {
+          "name": "Create destination",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bali Island Escape\",\n  \"description\": \"Tropical beaches, rice terraces, and local culture.\",\n  \"location\": \"Bali, Indonesia\",\n  \"imageUrl\": \"https://example.com/bali.jpg\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/destinations"
+          }
+        },
+        {
+          "name": "Update destination",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bali Island Escape Updated\",\n  \"description\": \"Updated destination description.\",\n  \"location\": \"Bali, Indonesia\",\n  \"imageUrl\": \"https://example.com/bali-updated.jpg\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/destinations/{{destinationId}}"
+          }
+        },
+        {
+          "name": "Delete destination",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/destinations/{{destinationId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Travel Packages",
+      "item": [
+        {
+          "name": "Get all packages",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/packages" }
+        },
+        {
+          "name": "Get package by ID",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/packages/{{packageId}}" }
+        },
+        {
+          "name": "Create package",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bali Island Discovery\",\n  \"destination\": { \"id\": {{destinationId}} },\n  \"description\": \"Explore Ubud, visit local temples, and unwind by the coast.\",\n  \"duration\": \"6 days / 5 nights\",\n  \"price\": 1240.00,\n  \"availability\": 8\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/packages"
+          }
+        },
+        {
+          "name": "Update package",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bali Island Discovery Updated\",\n  \"destination\": { \"id\": {{destinationId}} },\n  \"description\": \"Updated Bali package description.\",\n  \"duration\": \"7 days / 6 nights\",\n  \"price\": 1350.00,\n  \"availability\": 6\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/packages/{{packageId}}"
+          }
+        },
+        {
+          "name": "Delete package",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/packages/{{packageId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get all customers",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/customers" }
+        },
+        {
+          "name": "Get customer by ID",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/customers/{{customerId}}" }
+        },
+        {
+          "name": "Create customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Asha Patel\",\n  \"email\": \"asha@example.com\",\n  \"phone\": \"+1 555 010 2020\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/customers"
+          }
+        },
+        {
+          "name": "Update customer",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Asha Patel Updated\",\n  \"email\": \"asha.updated@example.com\",\n  \"phone\": \"+1 555 010 2021\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/customers/{{customerId}}"
+          }
+        },
+        {
+          "name": "Delete customer",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/customers/{{customerId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Get all bookings",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/bookings" }
+        },
+        {
+          "name": "Get booking by ID",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/bookings/{{bookingId}}" }
+        },
+        {
+          "name": "Create booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customer\": { \"id\": {{customerId}} },\n  \"travelPackage\": { \"id\": {{packageId}} },\n  \"numberOfTravelers\": 2,\n  \"travelDate\": \"2027-03-20\",\n  \"bookingStatus\": \"PENDING\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Update booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customer\": { \"id\": {{customerId}} },\n  \"travelPackage\": { \"id\": {{packageId}} },\n  \"numberOfTravelers\": 3,\n  \"travelDate\": \"2027-03-21\",\n  \"bookingStatus\": \"CONFIRMED\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Delete booking",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/bookings/{{bookingId}}" }
+        }
+      ]
+    }
+  ]
+}
